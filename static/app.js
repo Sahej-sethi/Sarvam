@@ -123,6 +123,10 @@ function render() {
   $("step2").classList.toggle("active", Boolean(session.lesson));
   $("step3").classList.toggle("active", Object.keys(session.answers).length === 3);
   show("session-tools", active); show("document-status", active);
+  show("session-progress", Boolean(session.lesson));
+  const completed = Object.keys(session.answers).length;
+  $("session-progress-label").textContent = `${completed} / 3`;
+  $("session-progress-bar").value = completed;
   $("document-status").replaceChildren();
   if (active) {
     $("document-status").append(node("strong", session.filename), node("div", `${session.document_language} document → ${session.language} conversation`));
@@ -155,6 +159,7 @@ function renderQuestion() {
     tab.addEventListener("click", () => navigate(i)); $("question-tabs").append(tab);
   });
   $("answer").value = drafts[current] ?? session.answers[String(current)]?.answer ?? "";
+  $("answer-count").textContent = `${$("answer").value.length.toLocaleString()} / 4,000`;
   show("retry-transcribe", Boolean(recordingBlob));
   const result = session.answers[String(current)];
   show("feedback", Boolean(result));
@@ -197,7 +202,7 @@ $("previous").addEventListener("click", () => navigate(current - 1));
 $("next").addEventListener("click", () => navigate(current + 1));
 $("listen-summary").addEventListener("click", () => play("summary", "summary-audio"));
 $("listen-question").addEventListener("click", () => play("question", "question-audio"));
-$("answer").addEventListener("input", () => { drafts[current] = $("answer").value; updateNavigation(); });
+$("answer").addEventListener("input", () => { drafts[current] = $("answer").value; $("answer-count").textContent = `${$("answer").value.length.toLocaleString()} / 4,000`; updateNavigation(); });
 $("evaluate").addEventListener("click", () => task("Listening for meaning and checking each takeaway…", async () => {
   drafts[current] = $("answer").value;
   if ($("feedback-audio")) clearAudio("feedback-audio");
@@ -248,6 +253,7 @@ async function transcribe() {
   await task("Transcribing your answer with Saaras…", async () => {
     const result = await api("transcribe", {index:current, audio:await base64(recordingBlob)});
     drafts[current] = result.transcript; $("answer").value = result.transcript; show("retry-transcribe", false);
+    $("answer-count").textContent = `${result.transcript.length.toLocaleString()} / 4,000`;
     $("answer").focus();
   });
 }

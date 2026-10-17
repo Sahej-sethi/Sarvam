@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" role="img" aria-labelledby="title desc">
+  <title id="title">SamjhaProof — Understanding, made visible.</title>
+  <desc id="desc">A document teach-back studio powered by Sarvam AI, with a paper-inspired green and cream identity.</desc>
+  <defs><linearGradient id="bg" x2="1" y2=".6"><stop stop-color="#173d33"/><stop offset="1" stop-color="#35563c"/></linearGradient></defs>
+  <rect width="1200" height="340" rx="24" fill="url(#bg)"/>
+  <circle cx="1110" cy="24" r="240" fill="none" stroke="#c9daa0" stroke-opacity=".09"/>
+  <circle cx="1110" cy="24" r="185" fill="none" stroke="#c9daa0" stroke-opacity=".09"/>
+  <rect x="48" y="39" width="37" height="37" rx="10" fill="#e3edbd"/>
+  <text x="59" y="67" fill="#244a35" font-family="Georgia,serif" font-size="34" font-style="italic">s</text>
+  <text x="99" y="65" fill="#f6f4e5" font-family="Arial,sans-serif" font-size="23" font-weight="600">SamjhaProof</text>
+  <text x="49" y="126" fill="#c6d69d" font-family="Arial,sans-serif" font-size="11" letter-spacing="3">THE DOCUMENT TEACH-BACK STUDIO</text>
+  <text x="46" y="194" fill="#faf7e9" font-family="Georgia,serif" font-size="57">Beyond “I understand.”</text>
+  <text x="49" y="233" fill="#c1cdb4" font-family="Arial,sans-serif" font-size="17">Read it. Say it your way. See what really stuck.</text>
+  <path d="M50 267h665" stroke="#c9daa0" stroke-opacity=".2"/>
+  <text x="49" y="300" fill="#d5e0b4" font-family="Arial,sans-serif" font-size="12" letter-spacing="1">PDF → EXPLAIN → TEACH BACK → UNDERSTAND</text>
+  <rect x="805" y="93" width="324" height="156" rx="22" fill="#b9ce8d" fill-opacity=".06" stroke="#bdd194" stroke-opacity=".25"/>
+  <text x="834" y="126" fill="#ccdaa9" font-family="Arial,sans-serif" font-size="10" letter-spacing="2">YOUR VOICE. YOUR LANGUAGE.</text>
+  <g stroke="#c9df9c" stroke-width="5" stroke-linecap="round">
+    <path d="M837 174v9m12-22v35m12-49v65m12-53v41m12-30v19m12-42v62m12-47v32m12-13v13m12-32v40m12-54v65m12-49v31m12-24v21m12-36v47m12-32v21m12-14v8"/>
+  </g>
+  <circle cx="1060" cy="179" r="22" fill="#d0e0a1"/><path d="m1050 179 7 7 13-15" fill="none" stroke="#325332" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="835" y="228" fill="#b9caa1" font-family="Arial,sans-serif" font-size="11">English + Hindi · Powered by Sarvam AI</text>
+</svg>

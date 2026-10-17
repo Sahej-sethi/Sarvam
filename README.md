@@ -1,71 +1,104 @@
-# SamjhaProof
+![SamjhaProof — Understanding, made visible.](static/readme-banner.svg)
 
-**Understanding, made visible.** A multilingual document teach-back app powered by
-Sarvam AI. Upload a PDF, learn three important points, explain them in your own
-words, and receive feedback grounded in quotes and page references.
+<p align="center">
+  <strong>A document can tell you what to do. Explaining it back shows what you understood.</strong><br>
+  <a href="https://sarvam-seven.vercel.app">Open live demo</a> ·
+  <a href="#quick-start">Run locally</a> ·
+  <a href="#sarvam-apis">Sarvam APIs</a> ·
+  <a href="#deployment">Deploy your own</a>
+</p>
 
-**Document → explanation → questions → spoken or typed answers → corrective feedback.**
+## What is SamjhaProof?
 
-## Why it is useful
+SamjhaProof turns a PDF into a short, multilingual teach-back session. It explains
+three important points, asks you to describe them in your own words, and identifies
+what you understood, missed, or misunderstood—with quotes from the original pages.
 
-Someone can read an instruction without understanding it. For example, an employee
-might remember to switch off a jammed machine but forget to unplug it. SamjhaProof
-identifies that missing step and explains it again in the learner's language.
+Think of a workshop safety sheet. You remember to switch off a jammed machine,
+but forget to unplug it. A summary might never reveal that gap. A teach-back can.
 
-Use it for onboarding, safety training, school instructions, notices, and policies.
-The current version supports English and Hindi. Scores reflect an AI assessment of
-the submitted answers, not a validated certification of understanding.
+**Read → Retell → Reflect.** Built for onboarding, safety training, classroom
+instructions, government notices, and policy explanations.
 
-## Features
+## Try it in two minutes
 
-- PDF upload plus a built-in workshop safety sample.
-- Separate document-language and conversation-language selectors.
-- Three grounded explanations and questions with exact source quotes.
-- Microphone recording, transcription, and editable transcripts.
-- Feedback identifying understood, missed, and incorrect facts.
-- Spoken explanations, questions, and corrective feedback.
-- Repeat attempts, overall scores, and downloadable JSON reports.
-- Resumable document processing and credential-redacted error explanations.
+1. Open **[sarvam-seven.vercel.app](https://sarvam-seven.vercel.app)**.
+2. Select the document language and your preferred conversation language.
+3. Upload a PDF, or choose **Try the workshop safety sample**.
+4. Read or listen to the explanation, then answer in your own words.
+5. Speak for up to 30 seconds or type. Review the transcript before checking it.
+6. Inspect the feedback and source quote. Retry a question if you want to.
+7. Complete all three questions and download your comprehension report.
+
+The built-in sample uses real Sarvam calls for OCR, reasoning, and requested speech.
+There are no simulated model responses in the application.
+
+## What you get
+
+| Feature | How it helps |
+| --- | --- |
+| English and Hindi | Learn in your preferred language, independently of the document language |
+| Three focused takeaways | Work through a small, manageable session |
+| Voice or text answers | Explain naturally, then correct transcription errors before grading |
+| Source quotes and page numbers | Check the evidence behind each question |
+| Specific feedback | See understood, missed, and incorrect facts instead of just a score |
+| Spoken corrections | Listen to the explanation again |
+| Session progress and repeat attempts | See what is done and revisit gaps |
+| Downloadable report | Keep the answers, evidence, feedback, and scores together |
 
 ## Sarvam APIs
 
-| Capability | API/model | Purpose |
+| Capability | Model / API | Role in SamjhaProof |
 | --- | --- | --- |
-| Document understanding | Sarvam Vision / Document AI | Extract page text and structure from PDFs |
-| Reasoning | `sarvam-105b` | Explain content, generate questions, and assess answers |
-| Speech recognition | `saaras:v4` | Transcribe recorded answers and code-mixed speech |
-| Speech synthesis | `bulbul:v4-flash` | Speak explanations, questions, and feedback |
+| Document intelligence | **Sarvam Vision / Document AI** | Extract text and structure from PDF pages |
+| Language reasoning | **`sarvam-105b`** | Explain content, generate questions, assess answers |
+| Speech recognition | **`saaras:v4`** | Transcribe recorded and code-mixed answers |
+| Speech synthesis | **`bulbul:v4-flash`** | Speak explanations, questions, and corrections |
 
-One `SARVAM_API_KEY` authenticates all four APIs. Your account needs credits and
-access to each API. Speech recognition runs only for recorded answers; speech
-synthesis runs only when you request audio.
+One server-side `SARVAM_API_KEY` authenticates all four APIs. The account needs
+credits and access to the APIs used. Text answers skip speech recognition; audio
+is generated only when requested and cached for replay.
 
-## Run locally
+## Quick start
 
-Requires Python 3.12 or newer and a Sarvam API subscription key.
+**Requirements:** Python 3.12+ and a Sarvam API subscription key.
 
 ```bash
+git clone https://github.com/Sahej-sethi/Sarvam.git
+cd Sarvam
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 ```
 
-Create `.env` in the project directory with the `SARVAM_API_KEY` variable and your
-key. The server loads it automatically without displaying it. An existing
-environment variable takes precedence. Git and Vercel uploads exclude `.env`.
+Create a `.env` file in the project root, add a variable named `SARVAM_API_KEY`,
+and set it to your key. The application loads it automatically without printing
+it. An already-exported environment variable takes precedence.
 
 ```bash
 .venv/bin/python server.py
 ```
 
-Open **http://localhost:8501**. No frontend build, database, or framework installation
-is needed. For another port: `SAMJHA_PORT=8502 .venv/bin/python server.py`.
+Open **http://localhost:8501**. No frontend build, database, or UI framework is
+required. For another port: `SAMJHA_PORT=8502 .venv/bin/python server.py`.
 
-## Deploy to Vercel
+## Deployment
 
-The repository includes `vercel.json`, `api/index.py`, `.python-version`, and
-`.vercelignore`. Vercel installs `requirements.txt` and uses Python 3.12.
+The working deployment uses **Vercel's Python WSGI runtime**. The only exported
+entry point in `api/index.py` is `app`; `vercel_app.py` adapts requests to the
+shared application routes. The local HTTP listener is not used in production.
 
-From this directory, with Node.js/npm installed:
+### Deploy through GitHub
+
+1. Fork or push this repository to your GitHub account.
+2. Import it into Vercel. Use **Other** as the framework preset and `.` as root.
+3. Add `SARVAM_API_KEY` to the **Production** environment variables.
+4. Deploy. Future pushes to the production branch trigger new deployments.
+
+No build command or output-directory override is needed. Set the key for
+**Preview** too if preview deployments should access Sarvam. Changes to environment
+variables require redeployment. `.env`, `.venv`, and tests are excluded from uploads.
+
+### Or use the Vercel CLI
 
 ```bash
 npx vercel login
@@ -74,88 +107,81 @@ npx vercel env add SARVAM_API_KEY production
 npx vercel --prod
 ```
 
-For `link`, create or select the **samjhaproof** project. Use **Other** as the
-framework preset and the current directory as root. No build command or output
-directory override is needed. Enter the key only in Vercel's environment-variable
-prompt, never in source or CLI arguments. The final command prints the deployed URL.
+Enter the key only in Vercel's environment-variable prompt. Never put it in source
+code or command-line arguments.
 
-Alternatively, import a Git repository containing these files into Vercel, set
-`SARVAM_API_KEY` in production environment variables, and deploy. Set it for Preview
-as well if preview deployments should call Sarvam. Environment changes require a
-new deployment.
+After deployment, `/api/health` should return `"status": "ok"` and
+`"runtime": "vercel-wsgi-v1"`. `configured` indicates whether the key is set.
 
-### Serverless behavior
+### Limits
 
-- Hosted sessions travel as compressed, HMAC-signed snapshots in request/response
-  bodies. The browser tab stores the snapshot in session storage; it expires after
-  one hour. Separate function instances can resume it without a database.
-- The signing key is derived on the server from the API key using a domain-separated
-  HMAC. The API key is never included in the snapshot or sent to the browser.
-- Snapshots are signed, **not encrypted**. The browser owner can inspect their own
-  extracted text and grading criteria. This is a learning demo, not a secure exam.
-- Vercel PDFs are capped at **3 MB**, allowing their base64 request to fit within
-  Vercel's [4.5 MB function payload limit](https://vercel.com/docs/functions/limitations).
-  Local PDFs can be up to 20 MiB. Both support at most 10 pages.
-- OCR is a Sarvam job polled through separate requests. The browser does not hold a
-  single function open while the whole PDF processes.
-- Function duration is configured to 300 seconds; availability depends on Vercel's
-  compute settings and plan. Sarvam HTTP calls time out after 75 seconds.
-- Generated MP3 audio is cached in the browser for replay.
-- There is no built-in login. Use Vercel Deployment Protection to restrict access
-  if the deployment should be limited to your demo audience.
+| | Hosted on Vercel | Local server |
+| --- | --- | --- |
+| PDF size | 3 MB | 20 MiB |
+| Document length | Up to 10 pages | Up to 10 pages |
+| Extracted text | Up to 65,000 characters | Up to 65,000 characters |
+| Recorded answer | Up to 30 seconds | Up to 30 seconds |
+| Session lifetime | One hour | One hour, or server restart |
 
-## Two-minute demo
-
-1. Select the document language and your preferred conversation language.
-2. Upload a short PDF or click **Try the workshop safety sample**.
-3. Read/listen to the explanation and answer the first question in your own words.
-4. Record up to 30 seconds or type. Review the transcript before checking it.
-5. Inspect the source quote, assessment, and corrective explanation.
-6. Retry if needed, complete all three questions, and download the report.
-
-The sample is a real one-page PDF. Its OCR, questions, grading, and speech use real
-Sarvam calls. The application does not simulate model responses.
+Vercel's PDF limit leaves room for base64 encoding within its
+[4.5 MB function payload limit](https://vercel.com/docs/functions/limitations).
+Function duration is configured to 300 seconds, subject to the project's plan
+and compute settings. Each Sarvam HTTP call times out after 75 seconds.
 
 ## Grounding and scoring
 
-Document AI returns structured page results via `results?format=json`. Every generated
-source quote must exist on its cited page, ignoring whitespace. Each question has
-1–4 explicit criteria. Facts marked understood or incorrect must cite words actually
-present in the user's answer.
+1. Document AI returns page-level structured JSON through `results?format=json`.
+2. Every generated source quote must occur on its cited page, ignoring whitespace.
+3. Each question has 1–4 explicit criteria based on the source.
+4. Claims marked understood or incorrect must cite words present in your answer.
+5. The app calculates the fraction of criteria marked understood. The overall score
+   weights all criteria equally across the three questions.
 
-The app calculates the fraction of criteria marked understood. The overall score
-weights all criteria equally. Evaluation prompts accept meaningful paraphrases and
-code-mixed speech rather than grading grammar, accent, or fluency. Source accuracy
-and the model's judgments still require human review.
+Evaluation prompts accept meaningful paraphrases and code-mixed speech. They assess
+meaning rather than grammar, accent, or fluency. These checks reduce obvious
+citation errors; they do not guarantee correct model judgments. The score is an
+AI assessment of the submitted answers, not a certification of understanding.
 
-## Privacy and limits
+## Sessions and privacy
 
-Documents, audio, and answers go to Sarvam for processing. The app does not write
-uploads or answers to project files. Locally, sessions stay in server memory and
-expire after one hour or restart. Hosted sessions use the signed browser snapshots
-described above. Reset clears current progress; it does not delete Sarvam jobs or
-revoke previously copied snapshots before expiry.
+The Sarvam key stays on the server and is excluded from Git and deployment uploads.
+Documents, audio, and answers are sent to Sarvam for processing. The app does not
+write uploads or answers to project files.
 
-Microphone access needs HTTPS or localhost. Poor scans, encrypted PDFs, or documents
-over 65,000 extracted characters may need a shorter, clearer excerpt. Partial OCR is
-flagged; only extracted pages are assessed.
+- **Local:** progress stays in server memory.
+- **Hosted:** progress travels in compressed, HMAC-signed snapshots stored in the
+  browser tab's session storage. Different function instances can resume a session
+  without a database.
+- **Signatures:** the signing key is derived from the API key through a
+  domain-separated HMAC. The API key is not included in the snapshot.
+- **Visibility:** snapshots are signed, not encrypted; the browser owner can inspect
+  their own extracted text and grading criteria. This is a learning demo, not a secure exam.
+- **Reset:** clears current progress. It does not delete Sarvam's jobs or revoke a
+  previously copied snapshot before its expiry.
 
-## Project layout
+There is no built-in login. Vercel Deployment Protection can restrict access if
+you want to limit who uses the deployment and its shared API quota.
+
+## Project structure
 
 ```text
-api/index.py          Vercel WSGI entrypoint (exports only app)
-vercel_app.py         Hosted routing adapter, independent of local host checks
-hosted_state.py       Signed, bounded session snapshots
-server.py             Local HTTP server and shared app routes
-documents.py          Document AI REST adapter
-core.py               Grounding, question generation, scoring, speech
-static/               Browser UI, recording, report downloads
-tests/                Offline Python and frontend checks
-vercel.json           Vercel routing and function settings
-requirements.txt     Python dependencies
+api/index.py              Vercel entry point; exports only the WSGI app
+vercel_app.py             Hosted request adapter and health endpoint
+server.py                 Local listener and shared application routes
+hosted_state.py           Signed, bounded serverless session snapshots
+documents.py              Document AI REST adapter
+core.py                   Grounding, questions, scoring, and speech
+static/
+  index.html              Responsive document teach-back workspace
+  style.css               Paper-and-green design system
+  app.js                  Recording, progress, feedback, and report download
+  readme-banner.svg       Repository banner
+tests/                    Offline application and frontend checks
+vercel.json               Hosting routes and function settings
+requirements.txt          Python dependencies
 ```
 
-## Tests
+## Verification
 
 ```bash
 .venv/bin/python -m unittest discover -s tests -v
@@ -163,25 +189,29 @@ node --check static/app.js
 node tests/test_frontend.cjs
 ```
 
-Tests run offline without reading `.env` or making paid API calls. They cover
-grounding, scoring, document formats, request boundaries, signatures, session expiry,
-progress across separate function instances, navigation, WAV encoding, and reports.
-Live deployment/API verification is separate.
+Checks run offline without reading `.env` or making paid API calls. They cover
+grounding, scoring, document formats, request boundaries, signed session expiry,
+WSGI routing, cross-origin writes, frontend navigation, progress, WAV encoding,
+and report generation. Live API and browser verification are separate.
 
 ## Troubleshooting
 
-- **Missing key:** set the production environment variable in Vercel and redeploy.
-- **Check hosted runtime:** open `/api/health`; it should show `vercel-wsgi-v1`.
-- **HTTP 400:** use the operation name and provider explanation shown in the error.
-- **HTTP 402/403:** check account credits and entitlement for that API.
-- **Payload too large:** use a PDF smaller than 3 MB on Vercel.
-- **Expired session:** refresh and start a new session.
-- **No microphone:** allow access, use HTTPS/localhost, or type your answer.
-- **No readable text:** use a clearer scan or shorter PDF.
+| Symptom | Check |
+| --- | --- |
+| Missing API key | Set the production environment variable and redeploy |
+| HTTP 400 | Read the operation name and Sarvam's explanation in the error |
+| HTTP 402 / 403 | Check credits and entitlement for that API |
+| Payload too large | Use a PDF under 3 MB on Vercel |
+| Expired session | Refresh and start a new session |
+| Microphone unavailable | Allow access and use HTTPS or localhost; typing also works |
+| No readable text | Try a clearer scan, an unencrypted PDF, or a shorter excerpt |
+| Partial extraction | Only successfully extracted pages are assessed |
 
-Official documentation: [Sarvam APIs](https://docs.sarvam.ai/api/getting-started/welcome),
-[Document AI](https://docs.sarvam.ai/api/api-guides-tutorials/document-intelligence/overview),
-[Chat](https://docs.sarvam.ai/api-reference/chat/chat-completions-v1),
-[STT](https://docs.sarvam.ai/api-reference/speech-to-text/transcribe),
-[TTS](https://docs.sarvam.ai/api-reference/text-to-speech/convert),
-[Vercel Python runtime](https://vercel.com/docs/functions/runtimes/python).
+---
+
+**Built with Sarvam AI · Python · browser-native JavaScript · Vercel**
+
+[Document AI docs](https://docs.sarvam.ai/api/api-guides-tutorials/document-intelligence/overview) ·
+[Chat docs](https://docs.sarvam.ai/api-reference/chat/chat-completions-v1) ·
+[Speech-to-text docs](https://docs.sarvam.ai/api-reference/speech-to-text/transcribe) ·
+[Text-to-speech docs](https://docs.sarvam.ai/api-reference/text-to-speech/convert)
