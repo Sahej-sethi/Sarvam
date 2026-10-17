@@ -63,6 +63,27 @@ class HostedStateTests(unittest.TestCase):
         request.headers = {"Host": "attacker.example"}
         self.assertFalse(request.valid_host())
 
+    def test_runtime_exports_never_select_local_handler(self):
+        from api.index import Handler
+        self.assertIs(Handler, handler)
+
+    def test_vercel_bridge_internal_host_and_forwarded_public_host(self):
+        request = object.__new__(handler)
+        request.headers = {"Host": "127.0.0.1:37841", "X-Forwarded-Host": "sarvam-jh22cz6ye-sethidkms-8397.vercel.app",
+                           "Origin": "https://sarvam-jh22cz6ye-sethidkms-8397.vercel.app"}
+        self.assertTrue(request.valid_host())
+        self.assertEqual(request.expected_origin(), request.headers["Origin"])
+
+    def test_vercel_bridge_without_forwarded_host(self):
+        request = object.__new__(handler)
+        public = "sarvam-jh22cz6ye-sethidkms-8397.vercel.app"
+        request.headers = {"Host": "localhost:39172", "Origin": f"https://{public}"}
+        with patch.dict("os.environ", {"VERCEL_URL": public}):
+            self.assertTrue(request.valid_host())
+            self.assertEqual(request.expected_origin(), f"https://{public}")
+            request.headers["Origin"] = "https://attacker.example"
+            self.assertNotEqual(request.expected_origin(), request.headers["Origin"])
+
     def test_hosted_response_includes_signed_state(self):
         request = object.__new__(handler)
         request.request_version = "HTTP/1.1"
