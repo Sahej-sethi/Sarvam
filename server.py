@@ -18,7 +18,7 @@ from pydantic import ValidationError
 from sarvamai import SarvamAI
 from sarvamai.core.api_error import ApiError
 
-from core import AppError, check_recording, evaluate, extract_pages, prepare, speak
+from core import AppError, check_recording, evaluate, extract_pages, prepare, speak, create_outline, prepare_section
 from documents import DocumentAPI
 
 ROOT = Path(__file__).resolve().parent
@@ -73,7 +73,7 @@ def load_environment():
 def new_state():
     return {"pages": [], "lesson": None, "answers": {}, "language": "English",
             "document_language": "English", "filename": "", "job": None,
-            "partial": False, "audio": {}, "created": time.time()}
+            "partial": False, "audio": {}, "mode": "quick", "outline": None, "created": time.time()}
 
 
 def public(state):
@@ -82,7 +82,7 @@ def public(state):
         lesson = {**lesson, "questions": [
             {k: v for k, v in q.items() if k != "criteria"} for q in lesson["questions"]]}
     return {k: v for k, v in state.items() if k in
-            ("pages", "answers", "language", "document_language", "filename", "job", "partial")} | {"lesson": lesson}
+            ("pages", "answers", "language", "document_language", "filename", "job", "partial", "mode", "outline")} | {"lesson": lesson}
 
 
 def sample_pdf():
@@ -235,6 +235,9 @@ class Handler(BaseHTTPRequestHandler):
         if route == "/api/document":
             language = data.get("language", "English")
             doc_language = data.get("document_language", "English")
+            mode = data.get("mode", "quick")
+            if mode not in ("quick", "sections"):
+                raise AppError("Choose Quick overview or Study by section.")
             if language not in LANGUAGES or doc_language not in LANGUAGES:
                 raise AppError("Choose English or Hindi.")
             raw = base64.b64decode(data.get("file", ""), validate=True)
@@ -247,7 +250,7 @@ class Handler(BaseHTTPRequestHandler):
             state.clear()
             state.update(new_state())
             state.update(job=job.job_id, filename=str(data.get("filename", "Document.pdf"))[:180],
-                         language=language, document_language=doc_language)
+                         language=language, document_language=doc_language, mode=mode)
             return public(state)
         if route == "/api/poll":
             if not state["job"]:
@@ -271,14 +274,32 @@ class Handler(BaseHTTPRequestHandler):
                 raise AppError("Wait for the document to finish processing.")
             if not state["lesson"]:
                 self.sarvam_stage = "Generating teach-back questions"
-                state["lesson"] = prepare(client, state["pages"], state["language"])
+                if state.get("mode", "quick") == "sections":
+                    if not state.get("outline"):
+                        self.sarvam_stage = "Mapping document sections"
+                        state["outline"] = create_outline(client, state["pages"], state["language"])
+                    outline = state["outline"]
+                    self.sarvam_stage = "Preparing the first section"
+                    first = prepare_section(client, state["pages"], state["language"], outline["sections"][0])
+                    state["lesson"] = {"title": outline["title"], "summary": outline["summary"],
+                        "questions": [first] + [{"section": s["title"], "ready": False} for s in outline["sections"][1:]]}
+                else:
+                    state["lesson"] = prepare(client, state["pages"], state["language"])
             return public(state)
         if not state["lesson"]:
             raise AppError("Create a teach-back session first.")
         index = data.get("index", 0)
-        if type(index) is not int or not 0 <= index < 3:
+        if type(index) is not int or not 0 <= index < len(state["lesson"]["questions"]):
             raise AppError("Select a valid question.")
         question = state["lesson"]["questions"][index]
+        if route == "/api/question":
+            if question.get("ready") is False:
+                self.sarvam_stage = "Preparing the selected section"
+                question = prepare_section(client, state["pages"], state["language"], state["outline"]["sections"][index])
+                state["lesson"]["questions"][index] = question
+            return public(state)
+        if question.get("ready") is False and not (route == "/api/speak" and data.get("kind") == "summary"):
+            raise AppError("Open this section to prepare its question first.")
         if route == "/api/transcribe":
             self.sarvam_stage = "Transcribing your answer"
             raw = base64.b64decode(data.get("audio", ""), validate=True)

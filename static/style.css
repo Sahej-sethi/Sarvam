@@ -72,6 +72,17 @@ h2 { font-weight: 600; font-size: 22px; line-height: 1.4; letter-spacing: -.5px;
 .file-limit { margin-top: 15px; font-size: 9px !important; letter-spacing: .6px; text-transform: uppercase; }
 .language-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; margin: 20px 0; }
 .language-grid label { font-size: 10px; color: #607158; font-weight: 650; }
+.mode-select { display: block; font-size: 11px; font-weight: 650; color: #607158; margin: 0 0 20px; }
+.mode-select small { display: block; font-size: 10px; line-height: 1.7; color: var(--muted); font-weight: 400; margin-top: 7px; }
+.coverage { margin-top: 21px; border-top: 1px solid var(--line); padding-top: 8px; }
+.coverage > summary { font-weight: 600; color: var(--ink); }
+.coverage > p { font-size: 10px; line-height: 1.7; }
+.coverage-item { display: block; width: 100%; text-align: left; margin: 7px 0; padding: 10px; background: transparent; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); }
+.coverage-item.selected { border-color: #98b17c; background: #edf3e3; }
+.coverage-item strong { display: block; font-size: 11px; font-weight: 550; }
+.coverage-item span { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; }
+.section-title { font-size: 12px; color: #647c58; font-weight: 650; margin-bottom: 15px; }
+.section-study .question-tabs { grid-template-columns: repeat(auto-fit, minmax(36px, 1fr)); }
 select { width: 100%; border: 1px solid #d8dfce; border-radius: 8px; padding: 10px; margin-top: 7px; background: var(--white); color: var(--ink); font-size: 12px; }
 .primary { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 45px; padding: 12px 18px; background: var(--ink); color: #fafbf0; border: 1px solid var(--ink); border-radius: 9px; font-size: 12px; font-weight: 600; transition: background .2s, box-shadow .2s, transform .2s; }
 .primary:hover { background: #2c5c43; box-shadow: 0 5px 12px #254b3314; }
@@ -187,7 +198,7 @@ audio { width: 100%; height: 40px; margin: 15px 0 8px; accent-color: var(--teal)
 .report h2 { max-width: 90%; font: 400 31px/1.3 Georgia, serif; letter-spacing: -.7px; }
 .report .score-number { font-size: 56px; margin: 16px 0 8px; }
 .report p { font-size: 12px; line-height: 1.85; color: #647b4c; max-width: 540px; }
-.report-bars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 17px; margin: 25px 0 27px; }
+.report-bars { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 17px; margin: 25px 0 27px; }
 .report-bars span { display: block; font-size: 10px; color: #637c4a; margin-bottom: 8px; }
 .report-bar { height: 6px; overflow: hidden; border-radius: 4px; background: #cbd7b7; }
 .report-bar-fill { height: 100%; border-radius: inherit; background: #4d7343; }

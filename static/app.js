@@ -8,6 +8,8 @@ try { stateToken = sessionStorage.getItem("samjhaproof-state") || ""; } catch (_
 const drafts = {}, mediaURLs = new Map();
 const audioCache = new Map();
 const languageLabels = {English: "en", Hindi: "hi"};
+const questionCount = () => session?.lesson?.questions.length || 0;
+const completedCount = () => session?.lesson?.questions.filter((_, i) => session.answers[String(i)]).length || 0;
 
 function show(id, visible = true) { $(id).classList.toggle("hidden", !visible); }
 function error(message) { $("notice").textContent = message; show("notice"); }
@@ -89,12 +91,12 @@ async function finishDocument() {
       await delay(3000);
     }
   }
-  $("working-text").textContent = "Finding three important takeaways and checking their sources…";
+  $("working-text").textContent = session.mode === "sections" ? "Mapping the document and preparing the first section…" : "Finding three important takeaways and checking their sources…";
   if (!session.lesson) session = await api("prepare");
   render();
 }
 async function start(file) {
-  session = await api("document", {filename: file.name, file: await base64(file), language: $("language").value, document_language: $("document-language").value});
+  session = await api("document", {filename: file.name, file: await base64(file), language: $("language").value, document_language: $("document-language").value, mode: $("study-mode").value});
   await finishDocument();
 }
 $("upload-form").addEventListener("submit", e => {
@@ -121,11 +123,12 @@ function render() {
   const active = Boolean(session.job);
   document.body.classList.toggle("session-active", active);
   $("step2").classList.toggle("active", Boolean(session.lesson));
-  $("step3").classList.toggle("active", Object.keys(session.answers).length === 3);
+  $("step3").classList.toggle("active", questionCount() > 0 && completedCount() === questionCount());
   show("session-tools", active); show("document-status", active);
   show("session-progress", Boolean(session.lesson));
-  const completed = Object.keys(session.answers).length;
-  $("session-progress-label").textContent = `${completed} / 3`;
+  const completed = completedCount(), total = questionCount();
+  $("session-progress-label").textContent = `${completed} / ${total}`;
+  $("session-progress-bar").max = total || 3;
   $("session-progress-bar").value = completed;
   $("document-status").replaceChildren();
   if (active) {
@@ -138,6 +141,7 @@ function render() {
     }
   }
   show("empty", !session.lesson); show("lesson", Boolean(session.lesson));
+  renderCoverage();
   if (!session.lesson) return;
   $("lesson-title").textContent = session.lesson.title;
   $("lesson-summary").textContent = session.lesson.summary;
@@ -146,15 +150,32 @@ function render() {
   for (const p of session.pages) $("pages").append(node("strong", `Page ${p.page}`), node("div", p.text, "page-content"));
   renderQuestion(); renderReport();
 }
+function renderCoverage() {
+  const sections = session.outline?.sections;
+  show("coverage", Boolean(sections && session.lesson));
+  document.body.classList.toggle("section-study", Boolean(sections));
+  $("coverage-items").replaceChildren();
+  if (!sections || !session.lesson) return;
+  $("coverage-note").textContent = `${sections.length} sections across ${session.pages.length} extracted pages. One question per section; this does not test every fact.`;
+  sections.forEach((section, i) => {
+    const button = node("button", undefined, current === i ? "coverage-item selected" : "coverage-item");
+    const done = Boolean(session.answers[String(i)]);
+    button.append(node("strong", `${done ? "✓ " : ""}${i + 1}. ${section.title}`), node("span", `Pages ${section.pages.join(", ")} · ${done ? "Assessed" : "Not yet assessed"}`));
+    button.setAttribute("aria-current", current === i ? "step" : "false");
+    button.addEventListener("click", () => navigate(i)); $("coverage-items").append(button);
+  });
+}
 function renderQuestion() {
   const q = session.lesson.questions[current];
-  $("counter").textContent = `${String(current + 1).padStart(2, "0")} / 03`;
+  $("counter").textContent = `${String(current + 1).padStart(2, "0")} / ${String(questionCount()).padStart(2, "0")}`;
+  $("section-title").textContent = q.section || ""; show("section-title", Boolean(q.section));
   $("question-text").textContent = q.question; $("explanation").textContent = q.explanation;
   $("source-page").textContent = `Page ${q.page}`; $("source-quote").textContent = q.quote;
   $("question-tabs").replaceChildren();
   session.lesson.questions.forEach((_, i) => {
     const answered = Boolean(session.answers[String(i)]);
-    const tab = node("button", `${answered ? "✓ " : ""}Takeaway ${i + 1}`, current === i ? "selected" : "");
+    const tab = node("button", `${answered ? "✓ " : ""}${session.mode === "sections" ? i + 1 : `Takeaway ${i + 1}`}`, current === i ? "selected" : "");
+    tab.setAttribute("title", session.lesson.questions[i].section || `Takeaway ${i + 1}`);
     tab.setAttribute("aria-current", current === i ? "step" : "false");
     tab.addEventListener("click", () => navigate(i)); $("question-tabs").append(tab);
   });
@@ -187,13 +208,22 @@ function renderQuestion() {
 }
 function updateNavigation() {
   $("previous").disabled = busy || recording || current === 0;
-  $("next").disabled = busy || recording || current === 2;
+  $("next").disabled = busy || recording || current >= questionCount() - 1;
   $("evaluate").disabled = busy || recording || !$("answer").value.trim();
-  if (session) $("completion-note").textContent = `${Object.keys(session.answers).length} of 3 explored`;
+  if (session) $("completion-note").textContent = `${completedCount()} of ${questionCount()} explored`;
 }
 function navigate(index) {
-  if (busy || recording || index < 0 || index > 2 || current === index) return;
+  if (busy || recording || index < 0 || index >= questionCount() || current === index) return;
   drafts[current] = $("answer").value;
+  if (session.lesson.questions[index].ready === false) {
+    return task("Preparing this section’s question and checking its source…", async () => {
+      session = await api("question", {index});
+      switchQuestion(index); renderCoverage(); renderReport();
+    });
+  }
+  switchQuestion(index); renderCoverage();
+}
+function switchQuestion(index) {
   ["question-audio", "recording-audio"].forEach(clearAudio);
   if ($("feedback-audio")) clearAudio("feedback-audio");
   recordingBlob = null; current = index; renderQuestion();
@@ -211,19 +241,19 @@ $("evaluate").addEventListener("click", () => task("Listening for meaning and ch
 }));
 
 function renderReport() {
-  const results = Object.values(session.answers), complete = results.length === 3;
+  const results = session.lesson.questions.map((_, i) => session.answers[String(i)]).filter(Boolean), complete = results.length === questionCount();
   show("report", complete); $("report").replaceChildren();
   if (!complete) return;
   const total = results.reduce((sum, r) => sum + r.results.length, 0);
   const understood = results.reduce((sum, r) => sum + r.results.filter(x => x.status === "understood").length, 0);
   const score = Math.round(understood / total * 100);
-  $("report").append(node("div", "YOUR CLARITY CHECK", "panel-label"), node("h2", score === 100 ? "That’s understanding you can explain." : "Now you know what needs another look."), node("div", `${score}%`, "score-number"), node("p", `${understood} of ${total} key facts demonstrated across three takeaways. This is an AI assessment of these answers, not a certification.`));
+  $("report").append(node("div", "YOUR CLARITY CHECK", "panel-label"), node("h2", score === 100 ? "That’s understanding you can explain." : "Now you know what needs another look."), node("div", `${score}%`, "score-number"), node("p", `${understood} of ${total} key facts demonstrated across ${questionCount()} ${session.mode === "sections" ? "sections" : "takeaways"}. This assesses the selected questions, not every fact in the document.`));
   const bars = node("div", undefined, "report-bars");
   session.lesson.questions.forEach((_, i) => { const item = node("div"), r = session.answers[String(i)], track = node("div", undefined, "report-bar"), fill = node("div", undefined, "report-bar-fill"); fill.style.width = `${r.score}%`; track.append(fill); item.append(node("span", `Takeaway ${i + 1} · ${r.score}%`), track); bars.append(item); });
   $("report").append(bars);
   const download = node("button", "Download my comprehension report ↓", "primary");
   download.addEventListener("click", () => {
-    const report = {product: "SamjhaProof", generated_at: new Date().toISOString(), document: session.filename, language: session.language, partial_extraction: session.partial, score, understood, criteria_total: total,
+    const report = {product: "SamjhaProof", generated_at: new Date().toISOString(), document: session.filename, language: session.language, mode: session.mode || "quick", outline: session.outline || null, partial_extraction: session.partial, score, understood, criteria_total: total,
       scope: "AI assessment of these answers against extracted source text; does not verify the original document.",
       takeaways: session.lesson.questions.map((q, i) => ({...q, assessment: session.answers[String(i)]}))};
     const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], {type:"application/json"}));
@@ -318,7 +348,8 @@ window.addEventListener("beforeunload", () => { if (stopCapture) stopCapture(); 
     maxPdfBytes = session.max_pdf_bytes || maxPdfBytes;
     $("file-limit").textContent = `PDF · Up to 10 pages · ${Math.floor(maxPdfBytes / 1000000)} MB`;
     if (!session.configured) error("Add SARVAM_API_KEY to .env, then restart server.py.");
-    current = [0,1,2].find(i => !session.answers[String(i)]) ?? 0;
+    const readyUnanswered = session.lesson?.questions.findIndex((q, i) => q.ready !== false && !session.answers[String(i)]);
+    current = readyUnanswered >= 0 ? readyUnanswered : 0;
     render();
   });
 })();

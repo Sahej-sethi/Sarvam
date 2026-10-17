@@ -10,8 +10,9 @@
 
 ## What is SamjhaProof?
 
-SamjhaProof turns a PDF into a short, multilingual teach-back session. It explains
-three important points, asks you to describe them in your own words, and identifies
+SamjhaProof turns a PDF into a multilingual teach-back session. Choose a quick
+three-question overview or a section-by-section study session. It explains the
+important points, asks you to describe them in your own words, and identifies
 what you understood, missed, or misunderstood—with quotes from the original pages.
 
 Think of a workshop safety sheet. You remember to switch off a jammed machine,
@@ -24,11 +25,12 @@ instructions, government notices, and policy explanations.
 
 1. Open **[sarvam-seven.vercel.app](https://sarvam-seven.vercel.app)**.
 2. Select the document language and your preferred conversation language.
-3. Upload a PDF, or choose **Try the workshop safety sample**.
+3. Select **Quick overview** or **Study by section**, then upload a PDF or choose
+   **Try the workshop safety sample**.
 4. Read or listen to the explanation, then answer in your own words.
 5. Speak for up to 30 seconds or type. Review the transcript before checking it.
 6. Inspect the feedback and source quote. Retry a question if you want to.
-7. Complete all three questions and download your comprehension report.
+7. Complete the session's questions and download your comprehension report.
 
 The built-in sample uses real Sarvam calls for OCR, reasoning, and requested speech.
 There are no simulated model responses in the application.
@@ -38,7 +40,8 @@ There are no simulated model responses in the application.
 | Feature | How it helps |
 | --- | --- |
 | English and Hindi | Learn in your preferred language, independently of the document language |
-| Three focused takeaways | Work through a small, manageable session |
+| Quick overview | Three focused questions for a short introduction |
+| Study by section | A content-based outline with one question per detected section |
 | Voice or text answers | Explain naturally, then correct transcription errors before grading |
 | Source quotes and page numbers | Check the evidence behind each question |
 | Specific feedback | See understood, missed, and incorrect facts instead of just a score |
@@ -130,12 +133,24 @@ and compute settings. Each Sarvam HTTP call times out after 75 seconds.
 
 ## Grounding and scoring
 
+**Quick overview** keeps the original three-question flow. **Study by section**
+detects 1–12 sections based on the document's actual topics and headings. Related
+topics are grouped when needed. Every extracted page must appear in the outline.
+Sections may span pages, and one page may contain multiple sections.
+
+The first question is prepared with the outline. Other questions are generated
+only when their section is opened, avoiding long, truncated model responses.
+Completed questions are cached. A failed generation leaves earlier progress intact.
+The sidebar shows each section's source pages and assessment status; navigation,
+progress, and reports adapt to the actual section count. Existing sessions remain
+compatible. One question per section does **not** guarantee every fact is tested.
+
 1. Document AI returns page-level structured JSON through `results?format=json`.
 2. Every generated source quote must occur on its cited page, ignoring whitespace.
 3. Each question has 1–4 explicit criteria based on the source.
 4. Claims marked understood or incorrect must cite words present in your answer.
 5. The app calculates the fraction of criteria marked understood. The overall score
-   weights all criteria equally across the three questions.
+   weights all criteria equally across the session's questions.
 
 Evaluation prompts accept meaningful paraphrases and code-mixed speech. They assess
 meaning rather than grammar, accent, or fluency. These checks reduce obvious

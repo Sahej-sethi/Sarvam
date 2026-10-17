@@ -19,16 +19,18 @@
     <div class="workspace" id="workspace">
       <aside class="document-panel card">
         <div class="panel-label"><span class="label-dot"></span> YOUR STARTING POINT <span>01 / 03</span></div>
-        <h2>A document. Three takeaways.</h2><p class="muted">An instruction sheet, a notice, a policy. Let’s make the important parts clear.</p>
+        <h2>A document. A clearer picture.</h2><p class="muted">Get a quick overview, or work through the document section by section.</p>
         <form id="upload-form">
           <label class="dropzone" id="dropzone" for="pdf"><span class="file-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M18 4H9a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V11L18 4Z"/><path d="M18 4v7h7M16 23V14m-4 4 4-4 4 4"/></svg></span><strong id="file-label">Drop your PDF here</strong><span id="file-meta">or click to browse your files</span><span class="file-limit" id="file-limit">PDF · Up to 10 pages</span><input id="pdf" type="file" accept="application/pdf,.pdf" aria-label="Choose a PDF document"></label>
           <div class="language-grid"><label>Document language<select id="document-language"><option>English</option><option>Hindi</option></select></label><label>Talk to me in<select id="language"><option>English</option><option>Hindi</option></select></label></div>
+          <label class="mode-select" for="study-mode">How would you like to study?<select id="study-mode"><option value="quick">Quick overview · 3 takeaways</option><option value="sections">Study by section · broader coverage</option></select><small>Section mode maps the document first, then prepares one question per detected section.</small></label>
           <button class="primary full" id="start" type="submit">Start my teach-back <span>↗</span></button>
         </form>
         <button id="sample" class="sample-link"><span class="sample-icon" aria-hidden="true">↗</span><span>No document handy?<strong>Try the workshop safety sample</strong></span><span aria-hidden="true">→</span></button>
         <div id="document-status" class="document-status hidden"></div>
         <div id="session-tools" class="hidden"><button id="reset" class="secondary full">Start with another document</button></div>
         <div id="session-progress" class="session-progress hidden"><div><span>Your clarity check</span><strong id="session-progress-label">0 / 3</strong></div><progress id="session-progress-bar" max="3" value="0" aria-label="Questions completed"></progress><p>One takeaway at a time. You’ve got this.</p></div>
+        <details id="coverage" class="coverage hidden" open><summary>Document coverage</summary><p id="coverage-note"></p><div id="coverage-items"></div></details>
         <div class="privacy"><span>◇</span><p>Your document, speech, and answers are sent to Sarvam to process. Session progress lasts one hour. Reset clears your current workspace.</p></div>
       </aside>
       <section class="main-panel">
@@ -36,6 +38,7 @@
         <div id="lesson" class="hidden">
           <div class="summary card"><div class="panel-label">THE BIG PICTURE <button id="listen-summary" class="text-button">◖ Listen</button></div><h2 id="lesson-title"></h2><p id="lesson-summary"></p><audio id="summary-audio" controls class="hidden" aria-label="Document explanation"></audio></div>
           <div class="question-card card"><div class="question-top"><div class="panel-label">LET’S TALK IT THROUGH</div><span class="question-counter" id="counter"></span></div><div id="question-tabs" class="question-tabs" aria-label="Questions"></div>
+            <p id="section-title" class="section-title hidden"></p>
             <div class="explanation" id="explanation"></div>
             <div class="question-heading"><h2 id="question-text"></h2><button class="round-button" id="listen-question" aria-label="Listen to question">◖</button></div><audio id="question-audio" controls class="hidden" aria-label="Spoken question"></audio>
             <p class="muted small">Explain it like you’re telling a friend. You can speak or type.</p>

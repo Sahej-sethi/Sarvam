@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from vercel_app import HostedRequest as handler, app
 from core import AppError
-from hosted_state import decode_state, encode_state
+from hosted_state import decode_state, encode_state, MAX_STATE_BYTES
 from server import new_state
 
 
@@ -37,7 +37,7 @@ class HostedStateTests(unittest.TestCase):
             decode_state(encode_state(self.state, self.key), self.key)
 
     def test_size_bounds(self):
-        self.state["pages"] = [{"page": 1, "text": "a" * 410000}]
+        self.state["pages"] = [{"page": 1, "text": "a" * (MAX_STATE_BYTES + 1)}]
         with self.assertRaises(AppError):
             encode_state(self.state, self.key)
         with self.assertRaises(AppError):

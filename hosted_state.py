@@ -10,8 +10,8 @@ import zlib
 from core import AppError
 from server import EXPIRY, new_state
 
-MAX_STATE_BYTES = 400_000
-MAX_TOKEN_CHARS = 540_000
+MAX_STATE_BYTES = 650_000
+MAX_TOKEN_CHARS = 900_000
 
 
 def signing_key(api_key):
