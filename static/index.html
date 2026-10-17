@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Turn important documents into understanding. Explain, teach back, and discover what needs another look.">
+  <title>SamjhaProof · Understanding, made visible</title>
+  <link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/" aria-label="SamjhaProof home"><span class="brand-icon">s<span>✓</span></span>Samjha<span>Proof</span></a><div class="top-right"><span class="local-dot"></span> Your learning workspace <span class="divider">/</span> <span class="powered">Powered by Sarvam</span></div></header>
+  <main>
+    <div class="eyebrow">READ IT. SAY IT. UNDERSTAND IT.</div>
+    <section class="intro"><div><h1>Beyond “I understand.”</h1><p>Turn an important document into a conversation.<br>Explain it in your own words. Discover what really stuck.</p></div><span class="intro-note">A little clarity.<br>A lot more confidence.<span class="note-line">↙</span></span></section>
+    <div class="steps" aria-label="Session progress"><span id="step1" class="step active"><b>01</b> Bring a document</span><span class="step-line"></span><span id="step2" class="step"><b>02</b> Make it make sense</span><span class="step-line"></span><span id="step3" class="step"><b>03</b> See what stuck</span></div>
+    <div id="notice" class="notice hidden" role="alert"></div>
+    <div id="working" class="working hidden" role="status" aria-live="polite"><span class="spinner"></span><span id="working-text"></span></div>
+    <div class="workspace">
+      <aside class="document-panel card">
+        <div class="panel-label">YOUR STARTING POINT <span>01</span></div>
+        <h2>A document. Three takeaways.</h2><p class="muted">An instruction sheet, a notice, a policy. Let’s make the important parts clear.</p>
+        <form id="upload-form">
+          <label class="dropzone" id="dropzone" for="pdf"><span class="file-icon">↥</span><strong id="file-label">Drop your PDF here</strong><span id="file-meta">or click to choose a file</span><span class="file-limit" id="file-limit">PDF · Up to 10 pages</span><input id="pdf" type="file" accept="application/pdf,.pdf" aria-label="Choose a PDF document"></label>
+          <div class="language-grid"><label>Document language<select id="document-language"><option>English</option><option>Hindi</option></select></label><label>Talk to me in<select id="language"><option>English</option><option>Hindi</option></select></label></div>
+          <button class="primary full" id="start" type="submit">Start my teach-back <span>↗</span></button>
+        </form>
+        <button id="sample" class="sample-link">No PDF handy? Try the workshop safety sample →</button>
+        <div id="document-status" class="document-status hidden"></div>
+        <div id="session-tools" class="hidden"><button id="reset" class="secondary full">Start with another document</button></div>
+        <div class="privacy"><span>◇</span><p>Your document, speech, and answers are sent to Sarvam to process. Session progress lasts one hour. Reset clears your current workspace.</p></div>
+      </aside>
+      <section class="main-panel">
+        <div id="empty" class="empty card"><div class="empty-art"><span class="art-doc">≡<span>≡</span></span><span class="art-bubble">“</span><span class="art-check">✓</span></div><span class="pill">UNDERSTANDING STARTS HERE</span><h2>More than a summary.<br>A moment of clarity.</h2><p>Get a simple explanation, talk it through,<br>and see exactly what you understood.</p><div class="empty-features"><span>↳ Grounded in your document</span><span>◉ Your voice, your language</span><span>✓ Feedback you can act on</span></div></div>
+        <div id="lesson" class="hidden">
+          <div class="summary card"><div class="panel-label">THE BIG PICTURE <button id="listen-summary" class="text-button">◖ Listen</button></div><h2 id="lesson-title"></h2><p id="lesson-summary"></p><audio id="summary-audio" controls class="hidden" aria-label="Document explanation"></audio></div>
+          <div class="question-card card"><div class="question-top"><div class="panel-label">LET’S TALK IT THROUGH</div><span class="question-counter" id="counter"></span></div><div id="question-tabs" class="question-tabs" aria-label="Questions"></div>
+            <div class="explanation" id="explanation"></div>
+            <div class="question-heading"><h2 id="question-text"></h2><button class="round-button" id="listen-question" aria-label="Listen to question">◖</button></div><audio id="question-audio" controls class="hidden" aria-label="Spoken question"></audio>
+            <p class="muted small">Explain it like you’re telling a friend. You can speak or type.</p>
+            <div class="recorder"><button id="record" class="record-button"><span class="record-dot"></span> Record my answer</button><span id="record-time">Up to 30 seconds</span></div><audio id="recording-audio" controls class="hidden" aria-label="Your recorded answer"></audio><button id="retry-transcribe" class="text-button hidden">Retry transcription</button>
+            <label class="answer-label" for="answer">YOUR ANSWER <span>Review your transcript before checking</span></label><textarea id="answer" maxlength="4000" rows="4" placeholder="Here’s how I understand it…"></textarea>
+            <div class="answer-actions"><span class="muted small">Meaning matters. Accent and grammar don’t.</span><button id="evaluate" class="primary">Check my understanding →</button></div>
+          </div>
+          <div id="feedback" class="card feedback hidden" aria-live="polite"></div>
+          <div class="source card"><div class="panel-label">THE SOURCE OF TRUTH <span id="source-page"></span></div><blockquote id="source-quote"></blockquote><details><summary>Explore extracted document</summary><div id="pages"></div></details></div>
+          <div class="navigation"><button id="previous" class="secondary">← Previous</button><span id="completion-note" class="muted small"></span><button id="next" class="secondary">Next takeaway →</button></div>
+          <div id="report" class="card report hidden"></div>
+        </div>
+      </section>
+    </div>
+    <footer><span>SamjhaProof <span class="footer-dot">·</span> Understanding, made visible.</span><span>AI feedback reflects your answer against the extracted text; it does not verify the document’s accuracy.</span></footer>
+  </main>
+</body>
+</html>
