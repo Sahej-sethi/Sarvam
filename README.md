@@ -143,7 +143,8 @@ flagged; only extracted pages are assessed.
 ## Project layout
 
 ```text
-api/index.py          Vercel Python handler
+api/index.py          Vercel WSGI entrypoint (exports only app)
+vercel_app.py         Hosted routing adapter, independent of local host checks
 hosted_state.py       Signed, bounded session snapshots
 server.py             Local HTTP server and shared app routes
 documents.py          Document AI REST adapter
@@ -170,6 +171,7 @@ Live deployment/API verification is separate.
 ## Troubleshooting
 
 - **Missing key:** set the production environment variable in Vercel and redeploy.
+- **Check hosted runtime:** open `/api/health`; it should show `vercel-wsgi-v1`.
 - **HTTP 400:** use the operation name and provider explanation shown in the error.
 - **HTTP 402/403:** check account credits and entitlement for that API.
 - **Payload too large:** use a PDF smaller than 3 MB on Vercel.
